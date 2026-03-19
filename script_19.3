@@ -8,3 +8,25 @@ from produtos
 where preco >
 	(select AVG(preco)
 	from produtos)
+
+
+
+--0.2
+select
+	c.nome as cliente,
+	c.telefone,
+	c.email,
+	(select count(*) from pets p
+		where p.cliente_id = c.id) as qt_pets,
+	(select count(*) from vendas v 
+		where v.cliente_id = c.id) as qtd_compras
+from clientes c
+where c.id in (
+	select distinct cliente_id
+	from vendas
+	)
+	and c.id in (
+	select distinct cliente_id
+	from pets 
+	)
+
