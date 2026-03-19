@@ -1,0 +1,10 @@
+select
+	nome,
+	preco,
+	--descricao,
+	(select round(avg(preco),2--2 "casas decimais")
+	from produtos) as preco_medio
+from produtos
+where preco >
+	(select AVG(preco)
+	from produtos)
