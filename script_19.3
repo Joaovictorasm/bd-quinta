@@ -29,4 +29,21 @@ where c.id in (
 	select distinct cliente_id
 	from pets 
 	)
+--0.3
 
+-- exemplos CTE
+
+with clientes_com_pets as (
+  	select 
+  		c.id,
+  		c.nome,
+  		c.telefone,
+  		c.email,
+  		Count(p.id) as qtd_pets,
+  		p.nome as nomes_pets
+  	from clientes c
+  	inner join pets p on c.id = p.cliente_id
+  	group by c.id, c.nome, c.telefone, c.email, p.nome
+
+)
+select * from clientes_com_pets
