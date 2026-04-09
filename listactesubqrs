@@ -1,0 +1,102 @@
+-- 1
+with ClientesProdutosDescricaoRacaoCTE as (
+	select
+		c.id as cliente_id,
+		c.nome as cliente_nome,
+		p.nome as produto_nome,
+		p.descricao as produto_descricao
+	from clientes c
+	inner join vendas v
+		on v.cliente_id = c.id
+	inner join itens_venda iv 
+		on iv.venda_id = v.id
+	inner join produtos p
+		on p.id = iv.produto_id 
+	where lower(p.descricao) like '%ração%'
+)
+select * from ClientesProdutosDescricaoRacaoCTE
+
+-- 2
+with ValorCompraMedioClienteCTE as (
+	select
+		c.id as cliente_id,
+		c.nome as cliente_nome,
+		round(avg(iv.preco_unitario * iv.quantidade), 2) as media_valor_compra
+	from clientes c
+	inner join vendas v
+		on v.cliente_id = c.id
+	inner join itens_venda iv 
+		on iv.venda_id = v.id
+	group by c.id, c.nome
+)
+select 
+	* 
+from ValorCompraMedioClienteCTE
+where media_valor_compra > 200
+
+-- 3
+with VendasPorProdutoCTE as (
+	select
+		p.id as produto_id,
+		p.nome as produto_nome,
+		iv.quantidade as vendas
+	from produtos p
+	inner join itens_venda iv 
+		on iv.produto_id = p.id
+	group by p.id, p.nome, iv.quantidade
+)
+select
+	*
+from VendasPorProdutoCTE 
+where vendas > 2
+
+-- 4
+with AgendamentosPorServicoCTE as (
+	select
+		s.id as servico_id,
+		s.nome as servico_nome,
+		count(a.id) as vendas
+	from servicos s 
+	inner join agendamentos a
+		on a.servico_id = s.id
+	group by s.id, s.nome
+	order by vendas desc
+)
+select 
+	*
+from AgendamentosPorServicoCTE 
+limit 3
+
+-- 5
+with ClientesDadosGeraisCTE as (
+	select
+		c.id as cliente_id,
+		c.nome as cliente_nome,
+		count(p.id) as cliente_pets,
+		v.valor_total as total_gasto
+	from clientes c
+	inner join vendas v
+		on v.cliente_id = c.id
+	inner join pets p
+		on p.cliente_id = c.id
+	group by c.id, v.valor_total 
+)
+-- A
+select cliente_id, cliente_nome, total_gasto from ClientesDadosGeraisCTE 
+
+--B
+
+select round(avg(total_por_cliente), 2) as media_total_gasto
+from (
+	select
+		cte.cliente_id,
+		sum(cte.total_gasto) as total_por_cliente
+	from ClientesDadosGeraisCTE cte
+	group by cte.cliente_id 
+)
+
+-- C
+
+select *
+from ClientesDadosGeraisCTE
+where cliente_pets > 1
